@@ -1,0 +1,19 @@
+1.'country' tablosundaki 'country' sütunundaki ülke isimlerinden 'A' karakteri ile başlayıp 'a' karakteri ile sonlananları sıralayın.
+SELECT country 
+FROM country 
+WHERE country LIKE 'A%a';
+
+2.'country' tablosundaki 'country' sütunundaki ülke isimlerinden en az 6 karakterden oluşan ve sonu 'n' karakteri ile sonlananları sıralayın:
+SELECT country FROM country 
+WHERE LENGTH(country) >= 6 AND country LIKE '%n';
+
+3.'film' tablosundaki 'title' sütunundaki film isimlerinden en az 4 adet büyük ya da küçük harf fark etmeksizin 'T' karakteri içeren film isimlerini sıralayın:
+SELECT title 
+FROM film 
+WHERE title ILIKE '%T%T%T%T%';
+
+4.'film' tablosundaki tüm sütunlardaki verilerden 'title' sütununda 'C' karakteri ile başlayan, 'length' sütununda 90'dan büyük ve 'rental_rate' sütununda 2.99 olan verileri sıralayın:
+SELECT * 
+FROM film 
+WHERE rental_rate = 2.99 AND title LIKE 'C%' AND length > 90;
+
