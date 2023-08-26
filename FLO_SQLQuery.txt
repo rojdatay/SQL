@@ -1,17 +1,17 @@
 select * from flo
 
---Kaç farklı müşterinin alışveriş yaptığını gösterecek sorguyu yazınız. 
+--KaÃ§ farklÄ± mÃ¼ÅŸterinin alÄ±ÅŸveriÅŸ yaptÄ±ÄŸÄ±nÄ± gÃ¶sterecek sorguyu yazÄ±nÄ±z. 
 select 
 count(master_id)
 from flo
 
---Toplam yapılan alışveriş sayısı ve ciroyu getirecek sorguyu yazınız.
+--Toplam yapÄ±lan alÄ±ÅŸveriÅŸ sayÄ±sÄ± ve ciroyu getirecek sorguyu yazÄ±nÄ±z.
 select 
 SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) TOPLAM_ALISVERIS,
 SUM([customer_value_total_ever_offline]+[customer_value_total_ever_online]) TOPLAM_CIRO
 from flo
 
--- Alışveriş başına ortalama ciroyu getirecek sorguyu yazınız.
+-- AlÄ±ÅŸveriÅŸ baÅŸÄ±na ortalama ciroyu getirecek sorguyu yazÄ±nÄ±z.
 select 
 SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) TOPLAM_ALISVERIS,
 SUM([customer_value_total_ever_offline]+[customer_value_total_ever_online]) TOPLAM_CIRO,
@@ -19,7 +19,7 @@ SUM([customer_value_total_ever_offline]+[customer_value_total_ever_online]) TOPL
 SUM([order_num_total_ever_online] + [order_num_total_ever_offline])) AVG_CIRO
 from flo
 
--- En son alışveriş yapılan kanal (last_order_channel) üzerinden yapılan alışverişlerin toplam ciro ve alışveriş sayılarını getirecek sorguyu yazınız. 
+-- En son alÄ±ÅŸveriÅŸ yapÄ±lan kanal (last_order_channel) Ã¼zerinden yapÄ±lan alÄ±ÅŸveriÅŸlerin toplam ciro ve alÄ±ÅŸveriÅŸ sayÄ±larÄ±nÄ± getirecek sorguyu yazÄ±nÄ±z. 
 
 select 
 [last_order_channel],
@@ -30,12 +30,12 @@ SUM([order_num_total_ever_online] + [order_num_total_ever_offline])) AVG_CIRO
 from flo
 GROUP BY [last_order_channel]
 
--- Store type kırılımında elde edilen toplam ciroyu getiren sorguyu yazınız.
+-- Store type kÄ±rÄ±lÄ±mÄ±nda elde edilen toplam ciroyu getiren sorguyu yazÄ±nÄ±z.
 SELECT[store_type], SUM([customer_value_total_ever_offline]+[customer_value_total_ever_online]) TOPLAM_CIRO
 from flo
 GROUP BY [store_type]
 
---Yıl kırılımında alışveriş sayılarını getirecek sorguyu yazınız (Yıl olarak müşterinin ilk alışveriş tarihi (first_order_date) yılını baz alınız) 
+--YÄ±l kÄ±rÄ±lÄ±mÄ±nda alÄ±ÅŸveriÅŸ sayÄ±larÄ±nÄ± getirecek sorguyu yazÄ±nÄ±z (YÄ±l olarak mÃ¼ÅŸterinin ilk alÄ±ÅŸveriÅŸ tarihi (first_order_date) yÄ±lÄ±nÄ± baz alÄ±nÄ±z) 
 SELECT 
 YEAR(CONVERT(DATE, [first_order_date])) ,
 SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) TOPLAM_ALISVERIS
@@ -43,29 +43,29 @@ from flo
 GROUP BY  YEAR(CONVERT(DATE, [first_order_date]))
 
 
--- En son alışveriş yapılan kanal kırılımında alışveriş başına ortalama ciroyu hesaplayacak sorguyu yazınız. 
+-- En son alÄ±ÅŸveriÅŸ yapÄ±lan kanal kÄ±rÄ±lÄ±mÄ±nda alÄ±ÅŸveriÅŸ baÅŸÄ±na ortalama ciroyu hesaplayacak sorguyu yazÄ±nÄ±z. 
 select
 [last_order_channel], 
 (SUM([customer_value_total_ever_offline]+[customer_value_total_ever_online])/ SUM([order_num_total_ever_online] + [order_num_total_ever_offline])) AVG_CIRO
 from flo
 GROUP BY [last_order_channel]
 
---Son 12 ayda en çok ilgi gören kategoriyi getiren sorguyu yazınız.
+--Son 12 ayda en Ã§ok ilgi gÃ¶ren kategoriyi getiren sorguyu yazÄ±nÄ±z.
 SELECT TOP 1
 DATEPART(MONTH, [last_order_date]) AS AY,  
 SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) AS TOPLAM_ALISVERIS,
 [interested_in_categories_12] 
 FROM FLO
-WHERE [last_order_date] >= DATEADD(MONTH, -12, '2021-05-30') -- Son 12 ayı filtrelemek için
-GROUP BY DATEPART(MONTH, [last_order_date]), [interested_in_categories_12] -- Aya ve kategoriye göre gruplama
-ORDER BY TOPLAM_ALISVERIS DESC -- Toplam alışverişe göre büyükten küçüğe sıralama
+WHERE [last_order_date] >= DATEADD(MONTH, -12, '2021-05-30') -- Son 12 ayÄ± filtrelemek iÃ§in
+GROUP BY DATEPART(MONTH, [last_order_date]), [interested_in_categories_12] -- Aya ve kategoriye gÃ¶re gruplama
+ORDER BY TOPLAM_ALISVERIS DESC -- Toplam alÄ±ÅŸveriÅŸe gÃ¶re bÃ¼yÃ¼kten kÃ¼Ã§Ã¼ÄŸe sÄ±ralama
 
 
 SELECT MAX([last_order_date]) AS en_son_tarih
 FROM FLO   -- 2021-05-30
 
 
---En çok tercih edilen store_type bilgisini getiren sorguyu yazınız. 
+--En Ã§ok tercih edilen store_type bilgisini getiren sorguyu yazÄ±nÄ±z. 
 SELECT TOP 1
 SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) AS TOPLAM_ALISVERIS,
 [store_type]
@@ -74,7 +74,7 @@ GROUP BY ([order_num_total_ever_online] + [order_num_total_ever_offline]), [stor
 ORDER BY 1 DESC
 
 
---En son alışveriş yapılan kanal (last_order_channel) bazında, en çok ilgi gören kategoriyi ve bu kategoriden ne kadarlık alışveriş yapıldığını getiren sorguyu yazınız
+--En son alÄ±ÅŸveriÅŸ yapÄ±lan kanal (last_order_channel) bazÄ±nda, en Ã§ok ilgi gÃ¶ren kategoriyi ve bu kategoriden ne kadarlÄ±k alÄ±ÅŸveriÅŸ yapÄ±ldÄ±ÄŸÄ±nÄ± getiren sorguyu yazÄ±nÄ±z
 SELECT
     KANAL,
     KATEGORI,
@@ -90,7 +90,7 @@ FROM (
 ) AS TempTable
 WHERE rn = 1;
 
--- En çok alışveriş yapan kişinin ID’ sini getiren sorguyu yazınız.
+-- En Ã§ok alÄ±ÅŸveriÅŸ yapan kiÅŸinin IDâ€™ sini getiren sorguyu yazÄ±nÄ±z.
 SELECT TOP 1
 [master_id], 
 SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) AS TOPLAM_ALISVERIS
@@ -100,7 +100,7 @@ ORDER BY TOPLAM_ALISVERIS DESC
 
 
 
--- En çok alışveriş yapan kişinin alışveriş başına ortalama cirosunu ve alışveriş yapma gün ortalamasını (alışveriş sıklığını) getiren sorguyu yazınız.
+-- En Ã§ok alÄ±ÅŸveriÅŸ yapan kiÅŸinin alÄ±ÅŸveriÅŸ baÅŸÄ±na ortalama cirosunu ve alÄ±ÅŸveriÅŸ yapma gÃ¼n ortalamasÄ±nÄ± (alÄ±ÅŸveriÅŸ sÄ±klÄ±ÄŸÄ±nÄ±) getiren sorguyu yazÄ±nÄ±z.
 SELECT TOP 1
 	[master_id], 
 	SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) AS TOPLAM_ALISVERIS,
@@ -110,7 +110,7 @@ FROM FLO
 GROUP BY [master_id]
 ORDER BY TOPLAM_ALISVERIS DESC
 
---En çok alışveriş yapan (ciro bazında) ilk 100 kişinin alışveriş yapma gün ortalamasını (alışveriş sıklığını) getiren sorguyu yazınız. 
+--En Ã§ok alÄ±ÅŸveriÅŸ yapan (ciro bazÄ±nda) ilk 100 kiÅŸinin alÄ±ÅŸveriÅŸ yapma gÃ¼n ortalamasÄ±nÄ± (alÄ±ÅŸveriÅŸ sÄ±klÄ±ÄŸÄ±nÄ±) getiren sorguyu yazÄ±nÄ±z. 
 SELECT TOP 100
 	[master_id],
 	(SUM([customer_value_total_ever_offline]+[customer_value_total_ever_online])/ SUM([order_num_total_ever_online] + [order_num_total_ever_offline])) AVG_CIRO,
@@ -119,7 +119,7 @@ FROM FLO
 GROUP BY [master_id]
 ORDER BY AVG_CIRO DESC
 
---En son alışveriş yapılan kanal (last_order_channel) kırılımında en çok alışveriş yapan müşteriyi getiren sorguyu yazınız
+--En son alÄ±ÅŸveriÅŸ yapÄ±lan kanal (last_order_channel) kÄ±rÄ±lÄ±mÄ±nda en Ã§ok alÄ±ÅŸveriÅŸ yapan mÃ¼ÅŸteriyi getiren sorguyu yazÄ±nÄ±z
 SELECT TOP 1
 	[master_id],[last_order_channel],
 	SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) AS TOPLAM_ALISVERIS
@@ -129,7 +129,7 @@ ORDER BY TOPLAM_ALISVERIS DESC
 
 
 
---En son alışveriş yapan kişinin ID’ sini getiren sorguyu yazınız. (Max son tarihte birden fazla alışveriş yapan ID bulunmakta.Bunları da getiriniz.) 
+--En son alÄ±ÅŸveriÅŸ yapan kiÅŸinin IDâ€™ sini getiren sorguyu yazÄ±nÄ±z. (Max son tarihte birden fazla alÄ±ÅŸveriÅŸ yapan ID bulunmakta.BunlarÄ± da getiriniz.) 
 SELECT 
 [master_id], [last_order_date]
 FROM FLO
