@@ -1,0 +1,137 @@
+select * from flo
+
+--Kaç farklý müþterinin alýþveriþ yaptýðýný gösterecek sorguyu yazýnýz. 
+select 
+count(master_id)
+from flo
+
+--Toplam yapýlan alýþveriþ sayýsý ve ciroyu getirecek sorguyu yazýnýz.
+select 
+SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) TOPLAM_ALISVERIS,
+SUM([customer_value_total_ever_offline]+[customer_value_total_ever_online]) TOPLAM_CIRO
+from flo
+
+-- Alýþveriþ baþýna ortalama ciroyu getirecek sorguyu yazýnýz.
+select 
+SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) TOPLAM_ALISVERIS,
+SUM([customer_value_total_ever_offline]+[customer_value_total_ever_online]) TOPLAM_CIRO,
+(SUM([customer_value_total_ever_offline]+[customer_value_total_ever_online])/ 
+SUM([order_num_total_ever_online] + [order_num_total_ever_offline])) AVG_CIRO
+from flo
+
+-- En son alýþveriþ yapýlan kanal (last_order_channel) üzerinden yapýlan alýþveriþlerin toplam ciro ve alýþveriþ sayýlarýný getirecek sorguyu yazýnýz. 
+
+select 
+[last_order_channel],
+SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) TOPLAM_ALISVERIS,
+SUM([customer_value_total_ever_offline]+[customer_value_total_ever_online]) TOPLAM_CIRO,
+(SUM([customer_value_total_ever_offline]+[customer_value_total_ever_online])/ 
+SUM([order_num_total_ever_online] + [order_num_total_ever_offline])) AVG_CIRO
+from flo
+GROUP BY [last_order_channel]
+
+-- Store type kýrýlýmýnda elde edilen toplam ciroyu getiren sorguyu yazýnýz.
+SELECT[store_type], SUM([customer_value_total_ever_offline]+[customer_value_total_ever_online]) TOPLAM_CIRO
+from flo
+GROUP BY [store_type]
+
+--Yýl kýrýlýmýnda alýþveriþ sayýlarýný getirecek sorguyu yazýnýz (Yýl olarak müþterinin ilk alýþveriþ tarihi (first_order_date) yýlýný baz alýnýz) 
+SELECT 
+YEAR(CONVERT(DATE, [first_order_date])) ,
+SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) TOPLAM_ALISVERIS
+from flo
+GROUP BY  YEAR(CONVERT(DATE, [first_order_date]))
+
+
+-- En son alýþveriþ yapýlan kanal kýrýlýmýnda alýþveriþ baþýna ortalama ciroyu hesaplayacak sorguyu yazýnýz. 
+select
+[last_order_channel], 
+(SUM([customer_value_total_ever_offline]+[customer_value_total_ever_online])/ SUM([order_num_total_ever_online] + [order_num_total_ever_offline])) AVG_CIRO
+from flo
+GROUP BY [last_order_channel]
+
+--Son 12 ayda en çok ilgi gören kategoriyi getiren sorguyu yazýnýz.
+SELECT TOP 1
+DATEPART(MONTH, [last_order_date]) AS AY,  
+SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) AS TOPLAM_ALISVERIS,
+[interested_in_categories_12] 
+FROM FLO
+WHERE [last_order_date] >= DATEADD(MONTH, -12, '2021-05-30') -- Son 12 ayý filtrelemek için
+GROUP BY DATEPART(MONTH, [last_order_date]), [interested_in_categories_12] -- Aya ve kategoriye göre gruplama
+ORDER BY TOPLAM_ALISVERIS DESC -- Toplam alýþveriþe göre büyükten küçüðe sýralama
+
+
+SELECT MAX([last_order_date]) AS en_son_tarih
+FROM FLO   -- 2021-05-30
+
+
+--En çok tercih edilen store_type bilgisini getiren sorguyu yazýnýz. 
+SELECT TOP 1
+SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) AS TOPLAM_ALISVERIS,
+[store_type]
+FROM FLO
+GROUP BY ([order_num_total_ever_online] + [order_num_total_ever_offline]), [store_type]
+ORDER BY 1 DESC
+
+
+--En son alýþveriþ yapýlan kanal (last_order_channel) bazýnda, en çok ilgi gören kategoriyi ve bu kategoriden ne kadarlýk alýþveriþ yapýldýðýný getiren sorguyu yazýnýz
+SELECT
+    KANAL,
+    KATEGORI,
+    TOPLAM_ALISVERIS
+FROM (
+    SELECT
+        [last_order_channel] AS KANAL,
+        [interested_in_categories_12] AS KATEGORI,
+        SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) AS TOPLAM_ALISVERIS,
+        ROW_NUMBER() OVER(PARTITION BY [last_order_channel] ORDER BY SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) DESC) AS rn
+    FROM FLO
+    GROUP BY [last_order_channel], [interested_in_categories_12]
+) AS TempTable
+WHERE rn = 1;
+
+-- En çok alýþveriþ yapan kiþinin ID’ sini getiren sorguyu yazýnýz.
+SELECT TOP 1
+[master_id], 
+SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) AS TOPLAM_ALISVERIS
+FROM FLO
+GROUP BY [master_id]
+ORDER BY TOPLAM_ALISVERIS DESC
+
+
+
+-- En çok alýþveriþ yapan kiþinin alýþveriþ baþýna ortalama cirosunu ve alýþveriþ yapma gün ortalamasýný (alýþveriþ sýklýðýný) getiren sorguyu yazýnýz.
+SELECT TOP 1
+	[master_id], 
+	SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) AS TOPLAM_ALISVERIS,
+	(SUM([customer_value_total_ever_offline]+[customer_value_total_ever_online])/ SUM([order_num_total_ever_online] + [order_num_total_ever_offline])) AVG_CIRO,
+	SUM(DATEDIFF(DAY, [first_order_date], [last_order_date_offline]))/SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) AS ALISVERIS_SIKLIK
+FROM FLO
+GROUP BY [master_id]
+ORDER BY TOPLAM_ALISVERIS DESC
+
+--En çok alýþveriþ yapan (ciro bazýnda) ilk 100 kiþinin alýþveriþ yapma gün ortalamasýný (alýþveriþ sýklýðýný) getiren sorguyu yazýnýz. 
+SELECT TOP 100
+	[master_id],
+	(SUM([customer_value_total_ever_offline]+[customer_value_total_ever_online])/ SUM([order_num_total_ever_online] + [order_num_total_ever_offline])) AVG_CIRO,
+	SUM(DATEDIFF(DAY, [first_order_date], [last_order_date_offline]))/SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) AS ALISVERIS_SIKLIK
+FROM FLO
+GROUP BY [master_id]
+ORDER BY AVG_CIRO DESC
+
+--En son alýþveriþ yapýlan kanal (last_order_channel) kýrýlýmýnda en çok alýþveriþ yapan müþteriyi getiren sorguyu yazýnýz
+SELECT TOP 1
+	[master_id],[last_order_channel],
+	SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) AS TOPLAM_ALISVERIS
+FROM FLO
+GROUP BY [last_order_channel],[master_id]
+ORDER BY TOPLAM_ALISVERIS DESC
+
+
+
+--En son alýþveriþ yapan kiþinin ID’ sini getiren sorguyu yazýnýz. (Max son tarihte birden fazla alýþveriþ yapan ID bulunmakta.Bunlarý da getiriniz.) 
+SELECT 
+[master_id], [last_order_date]
+FROM FLO
+WHERE [last_order_date] = (SELECT MAX([last_order_date]) FROM FLO)
+
