@@ -2,7 +2,7 @@ select * from flo
 
 --Kaç farklı müşterinin alışveriş yaptığını gösterecek sorguyu yazınız. 
 select 
-count(master_id)
+COUNT(DISTINCT(master_id))
 from flo
 
 --Toplam yapılan alışveriş sayısı ve ciroyu getirecek sorguyu yazınız.
@@ -20,7 +20,6 @@ SUM([order_num_total_ever_online] + [order_num_total_ever_offline])) AVG_CIRO
 from flo
 
 -- En son alışveriş yapılan kanal (last_order_channel) üzerinden yapılan alışverişlerin toplam ciro ve alışveriş sayılarını getirecek sorguyu yazınız. 
-
 select 
 [last_order_channel],
 SUM([order_num_total_ever_online] + [order_num_total_ever_offline]) TOPLAM_ALISVERIS,
